@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/navigation_home">
+
+    <!-- Home Fragment -->
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.example.eventdicoding.ui.fragment.HomeFragment"
+        android:label="@string/title_home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_navigation_home_to_eventDetailFragment"
+            app:destination="@id/eventDetailFragment" />
+    </fragment>
+
+    <!-- Upcoming Fragment -->
+    <fragment
+        android:id="@+id/navigation_upcoming"
+        android:name="com.example.eventdicoding.ui.fragment.UpcomingFragment"
+        android:label="@string/title_upcoming"
+        tools:layout="@layout/fragment_upcoming">
+        <action
+            android:id="@+id/action_upcomingFragment_to_eventDetailFragment"
+            app:destination="@id/eventDetailFragment" />
+    </fragment>
+
+    <!-- Finished Fragment -->
+    <fragment
+        android:id="@+id/navigation_finished"
+        android:name="com.example.eventdicoding.ui.fragment.FinishedFragment"
+        android:label="@string/title_finished"
+        tools:layout="@layout/fragment_finished">
+        <action
+            android:id="@+id/action_finishedFragment_to_eventDetailFragment"
+            app:destination="@id/eventDetailFragment" />
+    </fragment>
+
+    <!-- Event Detail Fragment -->
+    <fragment
+        android:id="@+id/eventDetailFragment"
+        android:name="com.example.eventdicoding.ui.fragment.EventDetailFragment"
+        android:label="@string/title_event_detail"
+        tools:layout="@layout/fragment_event_detail">
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+    </fragment>
+</navigation>

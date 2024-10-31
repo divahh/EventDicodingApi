@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">EventDicoding</string>
+    <string name="title_home">Home</string>
+    <string name="title_upcoming">Upcoming</string>
+    <string name="title_finished">Finished</string>
+    <string name="title_event_detail">Detail</string>
+
+    <string name="judul">Event Name</string>
+    <string name="owner">Pemilik :</string>
+    <string name="input_owner">Owner Data</string>
+    <string name="time">Waktu :</string>
+    <string name="input_time">Time Data</string>
+    <string name="quota">Kuota :</string>
+    <string name="input_quota">Quota Data</string>
+    <string name="regist">Pendaftar :</string>
+    <string name="input_regist">Registrant Data</string>
+    <string name="desc">Deskripsi :</string>
+    <string name="input_desc">Event Description</string>
+    <string name="btn_link">Open Event Link</string>
+    <string name="img_desc">EventImage</string>
+    <string name="event_name">Event Name</string>
+</resources>
