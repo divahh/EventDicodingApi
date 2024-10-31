@@ -36,7 +36,7 @@ class EventDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val eventId = arguments?.getInt("eventId") ?: return
+        val eventId = savedInstanceState?.getInt("eventId") ?: arguments?.getInt("eventId") ?: return
         viewModel.loadEventDetail(eventId)
 
         viewModel.eventDetail.observe(viewLifecycleOwner) { eventDetail ->
