@@ -91,12 +91,10 @@ class FinishedFragment : Fragment() {
             }
         })
 
-        // Observe the search results
         viewModel.searchResults.observe(viewLifecycleOwner) { searchResults ->
             if (searchResults.isEmpty()) {
                 Toast.makeText(requireContext(), "Tidak ada acara berdasarkan kata kunci!", Toast.LENGTH_SHORT).show()
             }
-            // Update the adapter with search results
             adapter.submitList(searchResults)
             binding.swipeRefreshLayout.isRefreshing = false
         }

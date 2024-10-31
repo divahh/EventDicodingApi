@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Upcoming Events"
+        android:text="@string/upcoming_events"
         android:textStyle="bold"
         android:textSize="18sp" />
 
@@ -22,7 +22,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Finished Events"
+        android:text="@string/finished_events"
         android:textStyle="bold"
         android:textSize="18sp"
         android:layout_marginTop="16dp" />

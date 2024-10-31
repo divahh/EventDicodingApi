@@ -41,7 +41,6 @@ class EventDetailFragment : Fragment() {
 
         viewModel.eventDetail.observe(viewLifecycleOwner) { eventDetail ->
             eventDetail?.let {
-                // Update UI dengan detail event
                 binding.eventName.text = it.nameEvent
                 binding.eventOwner.text = it.ownerEvent
                 binding.eventTime.text = it.beginTime

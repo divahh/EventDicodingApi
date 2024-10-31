@@ -10,31 +10,24 @@ import kotlinx.coroutines.launch
 
 class EventViewModel(private val repository: EventRepository) : ViewModel() {
 
-    // LiveData untuk daftar event yang akan datang
     private val _upcomingEvents = MutableLiveData<List<EventItem>>()
     val upcomingEvents: LiveData<List<EventItem>> get() = _upcomingEvents
 
-    // LiveData untuk daftar event yang sudah selesai
     private val _finishedEvents = MutableLiveData<List<EventItem>>()
     val finishedEvents: LiveData<List<EventItem>> get() = _finishedEvents
 
-    // LiveData untuk hasil pencarian event
     private val _searchResults = MutableLiveData<List<EventItem>>()
     val searchResults: LiveData<List<EventItem>> get() = _searchResults
 
-    // LiveData untuk detail sebuah event
     private val _eventDetail = MutableLiveData<EventItem?>()
     val eventDetail: LiveData<EventItem?> get() = _eventDetail
 
-    // LiveData untuk pesan error
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> get() = _errorMessage
 
-    // LiveData untuk status loading
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
 
-    // Memuat daftar event mendatang (akan datang)
     fun loadUpcomingEvents() {
         _isLoading.value = true
         viewModelScope.launch {
@@ -50,7 +43,6 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
         }
     }
 
-    // Memuat daftar event yang sudah selesai
     fun loadFinishedEvents() {
         _isLoading.value = true
         viewModelScope.launch {
@@ -66,7 +58,6 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
         }
     }
 
-    // Memuat detail sebuah event berdasarkan ID
     fun loadEventDetail(eventId: Int?) {
         if (eventId == null || eventId <= 0) {
             _errorMessage.value = "Invalid event ID"
@@ -75,7 +66,7 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
         _isLoading.value = true
         viewModelScope.launch {
             try {
-                val eventDetail = repository.getDetailEvents(eventId) // Dapatkan detail event berdasarkan ID
+                val eventDetail = repository.getDetailEvents(eventId)
                 _eventDetail.value = eventDetail
                 _errorMessage.value = null
             } catch (e: Exception) {
@@ -87,7 +78,6 @@ class EventViewModel(private val repository: EventRepository) : ViewModel() {
     }
 
 
-    // Mencari event yang sudah selesai berdasarkan kata kunci
     fun searchFinishedEvents(keyword: String) {
         _isLoading.value = true
         viewModelScope.launch {

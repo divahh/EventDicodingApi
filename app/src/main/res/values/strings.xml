@@ -19,4 +19,6 @@
     <string name="btn_link">Open Event Link</string>
     <string name="img_desc">EventImage</string>
     <string name="event_name">Event Name</string>
+    <string name="upcoming_events">Upcoming Events</string>
+    <string name="finished_events">Finished Events</string>
 </resources>
