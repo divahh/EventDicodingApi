@@ -17,9 +17,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, HomeFragment())
-                .commit()
+            loadFragment(HomeFragment())
         }
 
         binding.navView.setOnItemSelectedListener { menuItem ->

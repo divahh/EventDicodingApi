@@ -12,7 +12,7 @@
     <string name="input_time">Time Data</string>
     <string name="quota">Kuota :</string>
     <string name="input_quota">Quota Data</string>
-    <string name="regist">Pendaftar :</string>
+    <string name="regist">Sisa Kuota :</string>
     <string name="input_regist">Registrant Data</string>
     <string name="desc">Deskripsi :</string>
     <string name="input_desc">Event Description</string>

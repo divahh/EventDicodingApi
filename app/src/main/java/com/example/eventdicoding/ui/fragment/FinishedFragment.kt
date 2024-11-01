@@ -17,6 +17,7 @@ import com.example.eventdicoding.ui.adapter.EventAdapter
 import com.example.eventdicoding.viewmodel.EventViewModel
 import com.example.eventdicoding.viewmodel.EventViewModelFactory
 
+@Suppress("DEPRECATION")
 class FinishedFragment : Fragment() {
 
     private var _binding: FragmentFinishedBinding? = null
@@ -67,7 +68,7 @@ class FinishedFragment : Fragment() {
         // Observe error messages and show them as toast
         viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Halaman Finished Event tidak dapat dimuat", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -93,7 +94,7 @@ class FinishedFragment : Fragment() {
 
         viewModel.searchResults.observe(viewLifecycleOwner) { searchResults ->
             if (searchResults.isEmpty()) {
-                Toast.makeText(requireContext(), "Tidak ada acara berdasarkan kata kunci!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Tidak ada event berdasarkan kata kunci!", Toast.LENGTH_SHORT).show()
             }
             adapter.submitList(searchResults)
             binding.swipeRefreshLayout.isRefreshing = false
@@ -112,6 +113,21 @@ class FinishedFragment : Fragment() {
                 .commit()
         }
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (::adapter.isInitialized) {
+            outState.putParcelableArrayList("events", ArrayList(adapter.currentList))
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedInstanceState?.getParcelableArrayList<EventItem>("events")?.let {
+            adapter.submitList(it)
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

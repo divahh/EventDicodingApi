@@ -36,6 +36,12 @@ class EventDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(requireContext(), "Halaman Detail tidak dapat dimuat", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         val eventId = savedInstanceState?.getInt("eventId") ?: arguments?.getInt("eventId") ?: return
         viewModel.loadEventDetail(eventId)
 
@@ -45,7 +51,8 @@ class EventDetailFragment : Fragment() {
                 binding.eventOwner.text = it.ownerEvent
                 binding.eventTime.text = it.beginTime
                 binding.eventQuota.text = it.quota.toString()
-                binding.eventRegistrant.text = it.registrant.toString()
+                val remaining = it.quota - it.registrant
+                binding.eventRegistrant.text = remaining.toString()
                 val parsedDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     Html.fromHtml(it.description, Html.FROM_HTML_MODE_LEGACY)
                 } else {
@@ -56,8 +63,7 @@ class EventDetailFragment : Fragment() {
                     .load(it.imgEvent)
                     .into(binding.eventImage)
             } ?: run {
-                // Tampilkan pesan error jika data null
-                Toast.makeText(context, "Event details not available", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Event details tidak tersedia", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -65,7 +71,22 @@ class EventDetailFragment : Fragment() {
             viewModel.eventDetail.value?.link?.let { url ->
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)
-            } ?: Toast.makeText(context, "Link not available", Toast.LENGTH_SHORT).show()
+            } ?: Toast.makeText(context, "Link tidak tersedia", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val eventId = arguments?.getInt("eventId")
+        eventId?.let {
+            outState.putInt("eventId", it)
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedInstanceState?.getInt("eventId")?.let {
+            viewModel.loadEventDetail(it)
         }
     }
 

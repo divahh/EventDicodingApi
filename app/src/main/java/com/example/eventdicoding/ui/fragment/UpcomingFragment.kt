@@ -17,6 +17,7 @@ import com.example.eventdicoding.ui.adapter.EventAdapter
 import com.example.eventdicoding.viewmodel.EventViewModel
 import com.example.eventdicoding.viewmodel.EventViewModelFactory
 
+@Suppress("DEPRECATION")
 class UpcomingFragment : Fragment() {
     private var _binding: FragmentUpcomingBinding? = null
     private val binding get() = _binding!!
@@ -54,7 +55,7 @@ class UpcomingFragment : Fragment() {
         // Observe error messages
         viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
             if (message != null) {
-                Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Halaman Upcoming Event tidak dapat dimuat", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -71,6 +72,20 @@ class UpcomingFragment : Fragment() {
                 .replace(R.id.container, detailFragment)
                 .addToBackStack(null)
                 .commit()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (::adapter.isInitialized) {
+            outState.putParcelableArrayList("events", ArrayList(adapter.currentList))
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedInstanceState?.getParcelableArrayList<EventItem>("events")?.let {
+            adapter.submitList(it)
         }
     }
 

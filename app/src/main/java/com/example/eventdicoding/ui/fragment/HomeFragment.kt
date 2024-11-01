@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -16,6 +17,7 @@ import com.example.eventdicoding.ui.adapter.EventAdapter
 import com.example.eventdicoding.viewmodel.EventViewModel
 import com.example.eventdicoding.viewmodel.EventViewModelFactory
 
+@Suppress("DEPRECATION")
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
@@ -49,6 +51,16 @@ class HomeFragment : Fragment() {
             adapter = finishedAdapter
         }
 
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.swipeRefreshLayout.isRefreshing = isLoading
+        }
+
+        viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(requireContext(), "Halaman Home tidak dapat dimuat", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         // Observe data from ViewModel
         viewModel.upcomingEvents.observe(viewLifecycleOwner) { events ->
             activeAdapter.submitList(events.take(5))
@@ -74,6 +86,26 @@ class HomeFragment : Fragment() {
                 .commit()
         }
     }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        if (::activeAdapter.isInitialized) {
+            outState.putParcelableArrayList("upcomingEvents", ArrayList(activeAdapter.currentList))
+            outState.putParcelableArrayList("finishedEvents", ArrayList(finishedAdapter.currentList))
+        }
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        savedInstanceState?.getParcelableArrayList<EventItem>("upcomingEvents")?.let {
+            activeAdapter.submitList(it)
+        }
+        savedInstanceState?.getParcelableArrayList<EventItem>("finishedEvents")?.let {
+            finishedAdapter.submitList(it)
+        }
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
