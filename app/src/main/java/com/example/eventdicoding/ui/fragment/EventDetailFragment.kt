@@ -42,6 +42,10 @@ class EventDetailFragment : Fragment() {
             }
         }
 
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        }
+
         val eventId = savedInstanceState?.getInt("eventId") ?: arguments?.getInt("eventId") ?: return
         viewModel.loadEventDetail(eventId)
 
