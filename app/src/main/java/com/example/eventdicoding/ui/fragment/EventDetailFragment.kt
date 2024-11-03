@@ -5,10 +5,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Html
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
@@ -27,6 +26,7 @@ class EventDetailFragment : Fragment() {
     private val viewModel: EventViewModel by viewModels {
         EventViewModelFactory(repository)
     }
+    private var eventId: Int? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentEventDetailBinding.inflate(inflater, container, false)
@@ -35,6 +35,16 @@ class EventDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupActionBar()
+
+        eventId = savedInstanceState?.getInt("eventId") ?: arguments?.getInt("eventId")
+
+        if (eventId != null) {
+            viewModel.loadEventDetail(eventId!!)
+        } else {
+            Toast.makeText(requireContext(), "Event ID tidak ditemukan", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         viewModel.errorMessage.observe(viewLifecycleOwner) { errorMessage ->
             errorMessage?.let {
@@ -45,9 +55,6 @@ class EventDetailFragment : Fragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
-
-        val eventId = savedInstanceState?.getInt("eventId") ?: arguments?.getInt("eventId") ?: return
-        viewModel.loadEventDetail(eventId)
 
         viewModel.eventDetail.observe(viewLifecycleOwner) { eventDetail ->
             eventDetail?.let {
@@ -81,16 +88,37 @@ class EventDetailFragment : Fragment() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        val eventId = arguments?.getInt("eventId")
-        eventId?.let {
-            outState.putInt("eventId", it)
-        }
+        eventId?.let { outState.putInt("eventId", it) }
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
-        savedInstanceState?.getInt("eventId")?.let {
-            viewModel.loadEventDetail(it)
+        savedInstanceState?.getInt("eventId")?.let { restoredEventId ->
+            if (eventId == null) {
+                eventId = restoredEventId
+                viewModel.loadEventDetail(eventId!!)
+            }
+        }
+    }
+
+    private fun setupActionBar() {
+        val appCompatActivity = activity as? AppCompatActivity
+        appCompatActivity?.supportActionBar?.apply {
+            title = "Event Detail"
+            setDisplayHomeAsUpEnabled(true)
+        }
+
+        setHasOptionsMenu(true)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            android.R.id.home -> {
+                parentFragmentManager.popBackStack()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
         }
     }
 
