@@ -1,6 +1,7 @@
 package com.example.eventdicoding.data.model
 
 import android.os.Parcelable
+import com.example.eventdicoding.data.database.FavouriteEvent
 import com.google.gson.annotations.SerializedName
 import kotlinx.parcelize.Parcelize
 
@@ -14,5 +15,17 @@ data class EventItem(
     val quota: Int,
     @SerializedName("registrants") val registrant: Int,
     val description: String,
-    val link: String
-) : Parcelable
+    val link: String,
+    var isFavourite: Boolean = false
+) : Parcelable {
+
+    fun toFavouriteEvent(): FavouriteEvent {
+        return FavouriteEvent(
+            id = this.id,
+            name = this.nameEvent,
+            owner = this.ownerEvent,
+            beginTime = this.beginTime,
+            imageUrl = this.imgEvent
+        )
+    }
+}

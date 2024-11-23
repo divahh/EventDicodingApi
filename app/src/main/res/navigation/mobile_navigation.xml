@@ -38,6 +38,17 @@
             app:destination="@id/eventDetailFragment" />
     </fragment>
 
+    <!-- Favourite Fragment -->
+    <fragment
+        android:id="@+id/navigation_favourite"
+        android:name="com.example.eventdicoding.ui.fragment.FavouriteFragment"
+        android:label="@string/title_favourite"
+        tools:layout="@layout/fragment_favourite">
+        <argument
+            android:name="eventId"
+            app:argType="string" />
+    </fragment>
+
     <!-- Event Detail Fragment -->
     <fragment
         android:id="@+id/eventDetailFragment"

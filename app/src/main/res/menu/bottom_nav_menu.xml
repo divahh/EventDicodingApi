@@ -14,4 +14,9 @@
         android:id="@+id/navigation_finished"
         android:icon="@drawable/ic_finished_events"
         android:title="@string/title_finished" />
+
+    <item
+        android:id="@+id/navigation_favourite"
+        android:icon="@drawable/ic_favourite_full_events"
+        android:title="@string/title_favourite"/>
 </menu>

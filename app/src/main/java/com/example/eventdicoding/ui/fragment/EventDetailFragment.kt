@@ -8,14 +8,20 @@ import android.text.Html
 import android.view.*
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.eventdicoding.data.api.ApiConfig
+import com.example.eventdicoding.data.database.SettingPreferences
+import com.example.eventdicoding.data.database.dataStore
 import com.example.eventdicoding.data.repository.EventRepository
 import com.example.eventdicoding.databinding.FragmentEventDetailBinding
 import com.example.eventdicoding.viewmodel.EventViewModel
 import com.example.eventdicoding.viewmodel.EventViewModelFactory
+import com.example.eventdicoding.viewmodel.SettingViewModel
+import com.example.eventdicoding.viewmodel.SettingViewModelFactory
 
 @Suppress("DEPRECATION")
 class EventDetailFragment : Fragment() {
@@ -36,6 +42,16 @@ class EventDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupActionBar()
+
+        val modeSett = SettingPreferences.getInstance(requireContext().dataStore)
+        val settingViewModel = ViewModelProvider(this, SettingViewModelFactory(modeSett))[SettingViewModel::class.java]
+        settingViewModel.getThemeSettings().observe(viewLifecycleOwner) { isDarkModeActive ->
+            if (isDarkModeActive) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
 
         eventId = savedInstanceState?.getInt("eventId") ?: arguments?.getInt("eventId")
 

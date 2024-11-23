@@ -18,4 +18,10 @@ interface EventApiService {
         @Query("active") active: Int = -1,
         @Query("q") query: String
     ): EventResponse
+
+    @GET("events")
+    suspend fun getReminderEvents(
+        @Query("active") active: Int = -1,
+        @Query("limit") limit: Int = 1
+    ): EventResponse
 }

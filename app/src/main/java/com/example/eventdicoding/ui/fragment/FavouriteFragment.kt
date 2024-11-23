@@ -13,36 +13,27 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.eventdicoding.R
 import com.example.eventdicoding.data.Injection
-import com.example.eventdicoding.data.api.ApiConfig
 import com.example.eventdicoding.data.database.SettingPreferences
 import com.example.eventdicoding.data.database.dataStore
 import com.example.eventdicoding.data.model.EventItem
-import com.example.eventdicoding.data.repository.EventRepository
-import com.example.eventdicoding.databinding.FragmentUpcomingBinding
+import com.example.eventdicoding.databinding.FragmentFavouriteBinding
 import com.example.eventdicoding.ui.adapter.EventAdapter
-import com.example.eventdicoding.viewmodel.EventViewModel
-import com.example.eventdicoding.viewmodel.EventViewModelFactory
 import com.example.eventdicoding.viewmodel.FavouriteViewModel
 import com.example.eventdicoding.viewmodel.SettingViewModel
 import com.example.eventdicoding.viewmodel.SettingViewModelFactory
 
 @Suppress("DEPRECATION")
-class UpcomingFragment : Fragment() {
-    private var _binding: FragmentUpcomingBinding? = null
+class FavouriteFragment : Fragment() {
+    private var _binding: FragmentFavouriteBinding? = null
     private val binding get() = _binding!!
 
-    private val repository by lazy { EventRepository(ApiConfig.getServiceApi()) }
-    private val viewModel: EventViewModel by viewModels {
-        EventViewModelFactory(repository)
-    }
-
-    private val favouriteViewModel: FavouriteViewModel by viewModels {
+    private val viewModel: FavouriteViewModel by viewModels {
         Injection.provideFavoriteViewModelFactory(requireContext())
     }
     private lateinit var adapter: EventAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentUpcomingBinding.inflate(inflater, container, false)
+        _binding = FragmentFavouriteBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -59,62 +50,57 @@ class UpcomingFragment : Fragment() {
             }
         }
 
-        // Initialize adapter and RecyclerView
-        adapter = EventAdapter { event -> navigateToDetail(event) }
-        binding.rvUpcomingEvents.apply {
+        // Initialize adapter with toggle favorite functionality
+        adapter = EventAdapter { event -> navigateToDetail(event) }.apply {
+            onFavoriteClick = { event, isFavorite -> toggleFavorite(event, isFavorite) }
+        }
+
+        binding.rvFavouriteEvents.apply {
             layoutManager = LinearLayoutManager(requireContext())
-            adapter = this@UpcomingFragment.adapter
+            adapter = this@FavouriteFragment.adapter
         }
 
-        // Observe upcoming events data from ViewModel
-        viewModel.upcomingEvents.observe(viewLifecycleOwner) { events ->
+        // Observe favorite events from ViewModel
+        viewModel.favouriteEvents.observe(viewLifecycleOwner) { events ->
             adapter.submitList(events)
+            viewModel.setLoadingState(false)
         }
 
-        adapter.onFavoriteClick = { event, isFavorite -> toggleFavorite(event, isFavorite) }
-
-        favouriteViewModel.favouriteEvents.observe(viewLifecycleOwner) { favouriteEvents ->
-            val updatedActiveEvents = adapter.currentList.map { event ->
-                event.copy(isFavourite = favouriteEvents.any { it.id == event.id })
-            }
-            adapter.submitList(updatedActiveEvents)
-        }
-
+        // Observe loading state
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.swipeRefreshLayout.isRefreshing = isLoading
         }
 
-        // Observe error messages
-        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
-            if (message != null) {
-                Toast.makeText(requireContext(), "Halaman Upcoming Event tidak dapat dimuat", Toast.LENGTH_SHORT).show()
-            }
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            viewModel.setLoadingState(true)
         }
 
-        // Load upcoming events
-        viewModel.loadUpcomingEvents()
+        // Observe error messages
+        viewModel.errorMessage.observe(viewLifecycleOwner) { message ->
+            message?.let {
+                Toast.makeText(requireContext(), "Failed to load favorites", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun toggleFavorite(event: EventItem, isFavorite: Boolean) {
         if (isFavorite) {
-            favouriteViewModel.addFavourite(event.toFavouriteEvent())
+            viewModel.addFavourite(event.toFavouriteEvent())
             Toast.makeText(context, "Ditambahkan ke Favourite: ${event.nameEvent}", Toast.LENGTH_SHORT).show()
         } else {
-            favouriteViewModel.removeFavourite(event.toFavouriteEvent())
+            viewModel.removeFavourite(event.toFavouriteEvent())
             Toast.makeText(context, "Dihapus dari Favourite: ${event.nameEvent}", Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun navigateToDetail(event: EventItem) {
-        event.id.let { id ->
-            val detailFragment = EventDetailFragment().apply {
-                arguments = Bundle().apply { putInt("eventId", id) }
-            }
-            parentFragmentManager.beginTransaction()
-                .replace(R.id.container, detailFragment)
-                .addToBackStack(null)
-                .commit()
+        val detailFragment = EventDetailFragment().apply {
+            arguments = Bundle().apply { putInt("eventId", event.id) }
         }
+        parentFragmentManager.beginTransaction()
+            .replace(R.id.container, detailFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

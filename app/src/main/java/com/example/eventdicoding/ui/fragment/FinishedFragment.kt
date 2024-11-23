@@ -6,18 +6,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.eventdicoding.R
+import com.example.eventdicoding.data.Injection
 import com.example.eventdicoding.data.api.ApiConfig
+import com.example.eventdicoding.data.database.SettingPreferences
+import com.example.eventdicoding.data.database.dataStore
 import com.example.eventdicoding.data.model.EventItem
 import com.example.eventdicoding.data.repository.EventRepository
 import com.example.eventdicoding.databinding.FragmentFinishedBinding
 import com.example.eventdicoding.ui.adapter.EventAdapter
 import com.example.eventdicoding.viewmodel.EventViewModel
 import com.example.eventdicoding.viewmodel.EventViewModelFactory
+import com.example.eventdicoding.viewmodel.FavouriteViewModel
+import com.example.eventdicoding.viewmodel.SettingViewModel
+import com.example.eventdicoding.viewmodel.SettingViewModelFactory
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -32,6 +40,10 @@ class FinishedFragment : Fragment() {
     private val viewModel: EventViewModel by viewModels {
         EventViewModelFactory(repository)
     }
+
+    private val favouriteViewModel: FavouriteViewModel by viewModels {
+        Injection.provideFavoriteViewModelFactory(requireContext())
+    }
     private lateinit var adapter: EventAdapter
     private var searchJob: Job? = null
 
@@ -42,6 +54,16 @@ class FinishedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val modeSett = SettingPreferences.getInstance(requireContext().dataStore)
+        val settingViewModel = ViewModelProvider(this, SettingViewModelFactory(modeSett))[SettingViewModel::class.java]
+        settingViewModel.getThemeSettings().observe(viewLifecycleOwner) { isDarkModeActive ->
+            if (isDarkModeActive) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
 
         adapter = EventAdapter { event -> navigateToDetail(event) }
         binding.rvFinishedEvents.apply {
@@ -58,6 +80,15 @@ class FinishedFragment : Fragment() {
         viewModel.finishedEvents.observe(viewLifecycleOwner) { events ->
             adapter.submitList(events)
             binding.swipeRefreshLayout.isRefreshing = false
+        }
+
+        adapter.onFavoriteClick = { event, isFavorite -> toggleFavorite(event, isFavorite) }
+
+        favouriteViewModel.favouriteEvents.observe(viewLifecycleOwner) { favouriteEvents ->
+            val updatedFinishedEvents = adapter.currentList.map { event ->
+                event.copy(isFavourite = favouriteEvents.any { it.id == event.id })
+            }
+            adapter.submitList(updatedFinishedEvents)
         }
 
         // Observe search results data
@@ -119,6 +150,15 @@ class FinishedFragment : Fragment() {
         viewModel.searchFinishedEvents(query)
     }
 
+    private fun toggleFavorite(event: EventItem, isFavorite: Boolean) {
+        if (isFavorite) {
+            favouriteViewModel.addFavourite(event.toFavouriteEvent())
+            Toast.makeText(context, "Ditambahkan ke Favourite: ${event.nameEvent}", Toast.LENGTH_SHORT).show()
+        } else {
+            favouriteViewModel.removeFavourite(event.toFavouriteEvent())
+            Toast.makeText(context, "Dihapus dari Favourite: ${event.nameEvent}", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun navigateToDetail(event: EventItem) {
         event.id.let { id ->

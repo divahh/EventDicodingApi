@@ -23,4 +23,8 @@ class EventRepository(private val apiService: EventApiService) {
     suspend fun searchEvents(active: Int = -1, query: String): EventResponse {
         return apiService.searchEvents(active, query)
     }
+
+    suspend fun getReminderEvents(active: Int = -1, limit: Int): EventResponse {
+        return apiService.getReminderEvents(active, limit)
+    }
 }
